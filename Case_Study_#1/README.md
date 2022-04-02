@@ -135,7 +135,9 @@ rank_customer_item_count AS (
 	SELECT *, RANK() OVER(PARTITION BY customer_id ORDER BY count DESC)
 	FROM customer_item_count
 )
-SELECT customer_id, product_name
+SELECT
+  customer_id,
+  product_name
 FROM rank_customer_item_count
 WHERE rank = 1;
 ```
