@@ -396,14 +396,14 @@ WITH order_by_membership AS (
 )
 SELECT
   *,
-  CASE WHEN member = 'N' THEN NULL ELSE RANK() OVER(PARTITION BY customer_id, member ORDER BY order_date) END
+  CASE WHEN member = 'N' THEN NULL ELSE RANK() OVER(PARTITION BY customer_id, member ORDER BY order_date) END AS ranking
 FROM order_by_membership
 ORDER BY customer_id, order_date, product_name;
 ```
 
 #### Output:
 
-| customer_id   | order_date   | product_name   |   price | member   | rank   |
+| customer_id   | order_date   | product_name   |   price | member   | ranking   |
 |:--------------|:-------------|:---------------|--------:|:---------|:-------|
 | A             | 2021-01-01   | curry          |      15 | N        | null   |
 | A             | 2021-01-01   | sushi          |      10 | N        | null   |
