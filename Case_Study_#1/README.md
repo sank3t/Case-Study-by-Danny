@@ -1,5 +1,7 @@
 
-## [Case Study #1 - Danny's Diner](https://8weeksqlchallenge.com/case-study-1/)
+# [Case Study #1 - Danny's Diner](https://8weeksqlchallenge.com/case-study-1/)
+
+## Case Study Questions
 
 ### 1. What is the total amount each customer spent at the restaurant?
 
@@ -276,3 +278,145 @@ ORDER BY total_points DESC;
 | B             |            940 |
 | A             |            860 |
 | C             |            360 |
+
+---
+
+### 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+
+#### Query:
+
+```sql
+WITH membership AS (
+	SELECT
+	  s.customer_id,
+	  s.product_id,
+	  m2.product_name,
+	  m2.price,
+	  s.order_date,
+	  m1.join_date,
+	  DATE(join_date + INTERVAL '6 days') AS twice_points_validity
+	FROM sales s
+	INNER JOIN members m1
+	  ON s.customer_id = m1.customer_id
+	INNER JOIN menu m2
+	  ON s.product_id = m2.product_id
+),
+total_points_by_customer AS (
+	SELECT customer_id, product_name,
+	  (CASE
+		WHEN product_name = 'sushi' THEN price * 20
+		WHEN order_date BETWEEN join_date AND twice_points_validity THEN price * 20
+			ELSE price * 10
+		END
+	  ) AS total_points
+	FROM membership
+	WHERE order_date BETWEEN '2021-01-01' AND '2021-01-31'
+)
+SELECT
+	customer_id,
+	SUM(total_points) AS total_points_earned
+FROM total_points_by_customer
+GROUP BY customer_id
+ORDER BY total_points_earned DESC;
+```
+
+#### Output:
+
+| customer_id   |   total_points_earned |
+|:--------------|----------------------:|
+| A             |                  1370 |
+| B             |                   820 |
+
+---
+
+## Bonus Questions
+
+### 1. Join All The Things
+
+#### Query:
+
+```sql
+SELECT
+  s.customer_id,
+  s.order_date,
+  m2.product_name,
+  m2.price,
+  (CASE
+    WHEN s.order_date < m1.join_date THEN 'N'
+	WHEN s.order_date >= m1.join_date THEN 'Y' ELSE 'N' END) AS member
+FROM sales s
+LEFT JOIN members m1
+  ON s.customer_id = m1.customer_id
+LEFT JOIN menu m2
+  ON s.product_id = m2.product_id
+ORDER BY s.customer_id, s.order_date, m2.product_name;
+```
+
+#### Output:
+
+| customer_id   | order_date   | product_name   |   price | member   |
+|:--------------|:-------------|:---------------|--------:|:---------|
+| A             | 2021-01-01   | curry          |      15 | N        |
+| A             | 2021-01-01   | sushi          |      10 | N        |
+| A             | 2021-01-07   | curry          |      15 | Y        |
+| A             | 2021-01-10   | ramen          |      12 | Y        |
+| A             | 2021-01-11   | ramen          |      12 | Y        |
+| A             | 2021-01-11   | ramen          |      12 | Y        |
+| B             | 2021-01-01   | curry          |      15 | N        |
+| B             | 2021-01-02   | curry          |      15 | N        |
+| B             | 2021-01-04   | sushi          |      10 | N        |
+| B             | 2021-01-11   | sushi          |      10 | Y        |
+| B             | 2021-01-16   | ramen          |      12 | Y        |
+| B             | 2021-02-01   | ramen          |      12 | Y        |
+| C             | 2021-01-01   | ramen          |      12 | N        |
+| C             | 2021-01-01   | ramen          |      12 | N        |
+| C             | 2021-01-07   | ramen          |      12 | N        |
+
+---
+
+### 2. Rank All the things
+
+#### Query:
+
+```sql
+WITH order_by_membership AS (
+	SELECT
+	  s.customer_id,
+	  s.order_date,
+	  m2.product_name,
+	  m2.price,
+	  (CASE
+		WHEN s.order_date < m1.join_date THEN 'N'
+		WHEN s.order_date >= m1.join_date THEN 'Y' ELSE 'N' END) AS member
+	FROM sales s
+	LEFT JOIN members m1
+	  ON s.customer_id = m1.customer_id
+	LEFT JOIN menu m2
+	  ON s.product_id = m2.product_id
+)
+SELECT
+  *,
+  CASE WHEN member = 'N' THEN NULL ELSE RANK() OVER(PARTITION BY customer_id, member ORDER BY order_date) END
+FROM order_by_membership
+ORDER BY customer_id, order_date, product_name;
+```
+
+#### Output:
+
+| customer_id   | order_date   | product_name   |   price | member   | rank   |
+|:--------------|:-------------|:---------------|--------:|:---------|:-------|
+| A             | 2021-01-01   | curry          |      15 | N        | null   |
+| A             | 2021-01-01   | sushi          |      10 | N        | null   |
+| A             | 2021-01-07   | curry          |      15 | Y        | 1.0    |
+| A             | 2021-01-10   | ramen          |      12 | Y        | 2.0    |
+| A             | 2021-01-11   | ramen          |      12 | Y        | 3.0    |
+| A             | 2021-01-11   | ramen          |      12 | Y        | 3.0    |
+| B             | 2021-01-01   | curry          |      15 | N        | null   |
+| B             | 2021-01-02   | curry          |      15 | N        | null   |
+| B             | 2021-01-04   | sushi          |      10 | N        | null   |
+| B             | 2021-01-11   | sushi          |      10 | Y        | 1.0    |
+| B             | 2021-01-16   | ramen          |      12 | Y        | 2.0    |
+| B             | 2021-02-01   | ramen          |      12 | Y        | 3.0    |
+| C             | 2021-01-01   | ramen          |      12 | N        | null   |
+| C             | 2021-01-01   | ramen          |      12 | N        | null   |
+| C             | 2021-01-07   | ramen          |      12 | N        | null   |
