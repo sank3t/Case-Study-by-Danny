@@ -20,6 +20,8 @@ SELECT
 FROM customer_orders;
 ```
 
+---
+
 ### b. Cleaning `runner_orders`
 
 #### Query:
@@ -68,6 +70,8 @@ FROM customer_orders;
 |-----------------------:|
 |                     14 |
 
+---
+
 ### 2. How many unique customer orders were made?
 
 #### Query:
@@ -82,6 +86,8 @@ FROM customer_orders;
 |   unique_orders |
 |----------------:|
 |              10 |
+
+---
 
 ### 3. How many successful orders were delivered by each runner?
 
@@ -104,6 +110,8 @@ GROUP BY ro.runner_id;
 |           1 |                   4 |
 |           2 |                   3 |
 |           3 |                   1 |
+
+---
 
 ### 4. How many of each type of pizza was delivered?
 
@@ -128,6 +136,7 @@ GROUP BY pn.pizza_name;
 | Meatlovers   |                 9 |
 | Vegetarian   |                 3 |
 
+---
 
 ### 5. How many Vegetarian and Meatlovers were ordered by each customer?
 
@@ -158,6 +167,7 @@ ORDER BY co.customer_id;
 |           104 | Meatlovers   |       3 |
 |           105 | Vegetarian   |       1 |
 
+---
 
 ### 6. What was the maximum number of pizzas delivered in a single order?
 
@@ -189,3 +199,84 @@ WHERE rank = 1;
 |   order_id |   total_pizzas_delivered |
 |-----------:|-------------------------:|
 |          4 |                        3 |
+
+---
+
+### 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
+
+#### Query:
+
+```sql
+SELECT
+  co.customer_id,
+  SUM(
+	  CASE
+	  	WHEN co.exclusions IS NULL or co.extras IS NULL THEN 1 ELSE 0
+	  END) AS toppings_changed,
+  SUM(
+	  CASE
+	  	WHEN co.exclusions IS NULL AND co.extras IS NULL THEN 1 ELSE 0
+	  END) AS toppings_not_changed
+FROM tmp_customer_orders co
+INNER JOIN tmp_runner_orders ro
+  ON co.order_id = ro.order_id AND ro.distance IS NOT NULL
+GROUP BY co.customer_id
+ORDER BY co.customer_id;
+```
+
+#### Output:
+
+|   customer_id |   toppings_changed |   toppings_not_changed |
+|--------------:|-------------------:|-----------------------:|
+|           101 |                  2 |                      2 |
+|           102 |                  3 |                      3 |
+|           103 |                  3 |                      0 |
+|           104 |                  2 |                      1 |
+|           105 |                  1 |                      0 |
+
+---
+
+### 8. How many pizzas were delivered that had both exclusions and extras?
+
+#### Query:
+
+```sql
+SELECT COUNT(*) AS pizza_with_exclusions_and_extras
+FROM tmp_customer_orders co
+INNER JOIN tmp_runner_orders ro
+  ON co.order_id = ro.order_id AND ro.distance IS NOT NULL
+WHERE co.exclusions IS NOT NULL
+  AND co.extras IS NOT NULL;
+```
+
+#### Output:
+
+|   pizza_with_exclusions_and_extras |
+|-----------------------------------:|
+|                                  1 |
+
+---
+
+### 9. What was the total volume of pizzas ordered for each hour of the day?
+
+#### Query:
+
+```sql
+SELECT
+  EXTRACT(HOUR FROM order_time) AS order_hour,
+  COUNT(*) AS total_orders
+FROM tmp_customer_orders
+GROUP BY EXTRACT(HOUR FROM order_time)
+ORDER BY total_orders DESC;
+```
+
+#### Output:
+
+|   order_hour |   total_orders |
+|-------------:|---------------:|
+|           18 |              3 |
+|           23 |              3 |
+|           21 |              3 |
+|           13 |              3 |
+|           11 |              1 |
+|           19 |              1 |
