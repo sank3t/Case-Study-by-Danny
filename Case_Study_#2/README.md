@@ -14,8 +14,8 @@ SELECT
   order_id,
   customer_id,
   pizza_id,
-  CASE WHEN exclusions = 'null' THEN NULL ELSE exclusions END,
-  CASE WHEN extras = 'null' THEN NULL ELSE extras END,
+  CASE WHEN exclusions = 'null' or exclusions = '' THEN NULL ELSE exclusions END,
+  CASE WHEN extras = 'null' or extras = '' THEN NULL ELSE extras END,
   order_time
 FROM customer_orders;
 ```
