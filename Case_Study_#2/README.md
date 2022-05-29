@@ -280,3 +280,27 @@ ORDER BY total_orders DESC;
 |           13 |              3 |
 |           11 |              1 |
 |           19 |              1 |
+
+---
+
+### 10. What was the volume of orders for each day of the week?
+
+#### Query:
+
+```sql
+SELECT
+  TO_CHAR(order_time, 'DAY') AS order_day,
+  COUNT(*) AS total_orders
+FROM tmp_customer_orders
+GROUP BY TO_CHAR(order_time, 'DAY')
+ORDER BY total_orders DESC;
+```
+
+#### Output:
+
+| order_day   |   total_orders |
+|:------------|---------------:|
+| WEDNESDAY   |              5 |
+| SATURDAY    |              5 |
+| THURSDAY    |              3 |
+| FRIDAY      |              1 |
