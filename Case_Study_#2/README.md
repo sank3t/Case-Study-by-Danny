@@ -304,3 +304,33 @@ ORDER BY total_orders DESC;
 | FRIDAY      |              5 |
 | SATURDAY    |              3 |
 | SUNDAY      |              1 |
+
+---
+
+## b. Runner and Customer Experience
+
+### 1. How many runners signed up for each 1 week period?
+
+#### Query:
+
+```sql
+WITH runners_registered AS (
+  SELECT
+    CONCAT('Week ', RANK() OVER(ORDER BY DATE_TRUNC('week', registration_date))) AS week_number
+  FROM runners
+)
+SELECT
+  week_number,
+  COUNT(*) AS total_registration
+FROM runners_registered
+GROUP BY week_number
+ORDER BY week_number;
+```
+
+#### Output:
+
+| week_number   |   total_registration |
+|:--------------|---------------------:|
+| Week 1        |                    2 |
+| Week 3        |                    1 |
+| Week 4        |                    1 |
