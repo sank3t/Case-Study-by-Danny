@@ -334,3 +334,38 @@ ORDER BY week_number;
 | Week 1        |                    2 |
 | Week 3        |                    1 |
 | Week 4        |                    1 |
+
+---
+
+### 2. What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
+
+#### Query:
+
+```sql
+WITH runners_arrival_time AS (
+  SELECT
+    ro.runner_id,
+    co.order_time,
+    ro.pickup_time,
+    ROUND(
+      CAST(EXTRACT(EPOCH FROM (ro.pickup_time - co.order_time)) / 60 AS NUMERIC), 4) AS arrival_time_mins
+  FROM tmp_runner_orders ro
+  INNER JOIN tmp_customer_orders co
+    ON ro.order_id = co.order_id
+  WHERE ro.cancellation IS NULL
+)
+SELECT
+  runner_id,
+  ROUND(AVG(arrival_time_mins), 2) AS runner_avg_arrival_time_mins
+FROM runners_arrival_time
+GROUP BY runner_id
+ORDER BY runner_id;
+```
+
+#### Output:
+
+|   runner_id |   runner_avg_arrival_time_mins |
+|------------:|-------------------------------:|
+|           1 |                          15.68 |
+|           2 |                          23.72 |
+|           3 |                          10.47 |
