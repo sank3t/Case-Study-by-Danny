@@ -300,7 +300,7 @@ ORDER BY total_orders DESC;
 
 | order_day   |   total_orders |
 |:------------|---------------:|
-| WEDNESDAY   |              5 |
-| SATURDAY    |              5 |
-| THURSDAY    |              3 |
-| FRIDAY      |              1 |
+| MONDAY      |              5 |
+| FRIDAY      |              5 |
+| SATURDAY    |              3 |
+| SUNDAY      |              1 |
