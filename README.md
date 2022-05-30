@@ -9,3 +9,5 @@ The queries are written in PostgreSQL.
 ### Contents
 
 * [Case Study #1 - Danny's Diner](https://github.com/sank3t/Case-Study-by-Danny/tree/main/Case_Study_%231)
+
+* [Case Study #2 - Pizza Runner](https://github.com/sank3t/Case-Study-by-Danny/tree/main/Case_Study_%232) _(In Progress)_
