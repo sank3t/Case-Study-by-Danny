@@ -345,8 +345,6 @@ ORDER BY week_number;
 WITH runners_arrival_time AS (
   SELECT
     ro.runner_id,
-    co.order_time,
-    ro.pickup_time,
     ROUND(
       CAST(EXTRACT(EPOCH FROM (ro.pickup_time - co.order_time)) / 60 AS NUMERIC), 4) AS arrival_time_mins
   FROM tmp_runner_orders ro
