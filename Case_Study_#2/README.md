@@ -32,7 +32,7 @@ CREATE TEMP TABLE tmp_runner_orders AS
 SELECT
   order_id,
   runner_id,
-  CAST(CASE WHEN pickup_time = 'null' THEN NULL ELSE pickup_time END AS TIMESTAMP),
+  CAST(CASE WHEN pickup_time = 'null' THEN NULL ELSE pickup_time END AS TIMESTAMP) + INTERVAL '1 year' AS pickup_time,
   CAST (
     CASE
 	  WHEN distance = 'null' THEN NULL
