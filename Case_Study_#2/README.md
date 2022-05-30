@@ -16,7 +16,7 @@ SELECT
   pizza_id,
   CASE WHEN exclusions = 'null' or exclusions = '' THEN NULL ELSE exclusions END,
   CASE WHEN extras = 'null' or extras = '' THEN NULL ELSE extras END,
-  order_time
+  (order_time + INTERVAL '1 year') AS order_time
 FROM customer_orders;
 ```
 
